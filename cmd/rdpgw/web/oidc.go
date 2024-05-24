@@ -10,6 +10,7 @@ import (
 	"golang.org/x/oauth2"
 	"net/http"
 	"time"
+	"log"
 )
 
 const (
@@ -51,6 +52,7 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	 log.Printf("DATAAAAAAAAAAAAAA  %s by policy handler", oauth2Token)
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
@@ -82,6 +84,9 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	id := identity.FromRequestCtx(r)
 
 	userName := findUsernameInClaims(data)
+	 log.Printf("DATAAAAAAAAAAAAAA  %s by policy handler", data)
+	 log.Printf("DATAAAAAAAAAAAAAA2  %s by policy handler", resp.IDTokenClaims)
+	 log.Printf("DATAAAAAAAAAAAAAA3  %s by policy handler", *resp.IDTokenClaims)
 	if userName == "" {
 		http.Error(w, "no oidc claim for username found", http.StatusInternalServerError)
 	}
