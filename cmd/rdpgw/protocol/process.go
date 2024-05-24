@@ -121,9 +121,14 @@ func (p *Processor) Process(ctx context.Context) error {
 				return fmt.Errorf("%x: Channel create rejected, wrong state", E_PROXY_INTERNALERROR)
 			}
 			server, port := p.channelRequest(pkt)
+			client := p.tunnelAuthRequest(pkt)
 			host := net.JoinHostPort(server, strconv.Itoa(int(port)))
+			log.Printf("Not allowed to connect to10 %s by policy handler", p)
+			log.Printf("Not allowed to connect to12 %s by policy handler", ctx)
+			log.Printf("Not allowed to connect to14 %s by policy handler", pkt)
 			if p.gw.CheckHost != nil {
 				log.Printf("Verifying %s host connection", host)
+				log.Printf("Verifying111 %s host connection", client)
 				if ok, _ := p.gw.CheckHost(ctx, host); !ok {
 					log.Printf("Not allowed to connect to %s by policy handler", host)
 					msg := p.channelResponse(E_PROXY_RAP_ACCESSDENIED)

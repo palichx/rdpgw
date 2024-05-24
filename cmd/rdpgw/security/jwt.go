@@ -12,6 +12,7 @@ import (
 	"golang.org/x/oauth2"
 	"log"
 	"time"
+	//"encoding/json"
 )
 
 var (
@@ -77,7 +78,6 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 
 	standard := jwt.Claims{}
 	custom := customClaims{}
-
 	// Claims automagically checks the signature...
 	err = token.Claims(SigningKey, &standard, &custom)
 	if err != nil {
@@ -99,6 +99,21 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 	// validate the access token
 	tokenSource := Oauth2Config.TokenSource(ctx, &oauth2.Token{AccessToken: custom.AccessToken})
 	user, err := OIDCProvider.UserInfo(ctx, tokenSource)
+	//log.Printf("USER1  %s by policy handler", user )
+	log.Printf("USER1  %s by policy handler", standard.Subject )
+        
+	//var data map[string]interface{}
+	//if err := json.Unmarshal(user.Claims, &data); err != nil {
+	//log.Printf("unmarsahll fail" )
+	//}
+	//log.Printf("DATA2323323  %s by policy handler", data )
+
+	log.Printf("USER1  %s by policy handler", user.Claims )
+	log.Printf("USER2  %s by policy handler", user.Subject)
+	log.Printf("USER3  %s by policy handler", OIDCProvider)
+	log.Printf("USER4  %+s by policy handler", OIDCProvider)
+
+
 	if err != nil {
 		log.Printf("Cannot get user info for access token: %tunnel", err)
 		return false, err
@@ -108,7 +123,7 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 
 	tunnel.TargetServer = custom.RemoteServer
 	tunnel.RemoteAddr = custom.ClientIP
-	tunnel.User.SetUserName(user.Subject)
+	tunnel.User.SetUserName(standard.Subject)
 
 	return true, nil
 }
@@ -125,7 +140,7 @@ func GeneratePAAToken(ctx context.Context, username string, server string) (stri
 
 	standard := jwt.Claims{
 		Issuer:  "rdpgw",
-		Expiry:  jwt.NewNumericDate(time.Now().Add(time.Minute * 5)),
+		Expiry:  jwt.NewNumericDate(time.Now().Add(time.Minute * 3600)),
 		Subject: username,
 	}
 

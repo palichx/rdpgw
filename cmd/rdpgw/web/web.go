@@ -78,7 +78,9 @@ func (h *Handler) selectRandomHost() string {
 	return host
 }
 
-func (h *Handler) getHost(ctx context.Context, u *url.URL) (string, error) {
+func (h *Handler) getHost(ctx context.Context, u *url.URL, r *http.Request) (string, error) {
+	 id := identity.FromRequestCtx(r)
+
 	switch h.hostSelection {
 	case "roundrobin":
 		return h.selectRandomHost(), nil
@@ -109,6 +111,10 @@ func (h *Handler) getHost(ctx context.Context, u *url.URL) (string, error) {
 			return "", errors.New("invalid query parameter")
 		}
 		for _, check := range h.hosts {
+			check = strings.Replace(check, "{{ preferred_username }}", id.UserName(), 1)
+			log.Printf("ADD LOG4 %s specified in token", hosts[0])
+			log.Printf("ADD LOG5 %s specified in token", check)
+			log.Printf("ADD LOG7 %s specified in token", id.UserName())
 			if check == hosts[0] {
 				return hosts[0], nil
 			}
@@ -140,7 +146,7 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// determine host to connect to
-	host, err := h.getHost(ctx, r.URL)
+	host, err := h.getHost(ctx, r.URL, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
